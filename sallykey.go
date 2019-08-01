@@ -20,7 +20,7 @@ const (
 	PUBLIC_KEY_FILE  = "id_rsa.pub"
 	BITS             = 2048
 	PRE_DESCRIPTION  = "This tool can be used to generate an SSH public/private key pair." +
-		"\nKeys are generated using the RSA algorithm and have are 2048 bits in length." +
+		"\nKeys are generated using the RSA algorithm and are 2048 bits in length." +
 		"\n\nThe resulting key pair can be imported for use in programs" +
 		"\nsuch as FileZilla, as well as from the command line."
 	POST_DESCRIPTION = "Key pair has been generated successfully." +
