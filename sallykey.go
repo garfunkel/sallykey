@@ -27,9 +27,7 @@ const (
 		"\nPlease find the files below in the same directory as this program:" +
 		"\n\nPrivate key: " + PRIVATE_KEY_FILE +
 		"\nPublic key: " + PUBLIC_KEY_FILE
-	ERROR_DESCRIPTION = "Error generating key pair." +
-		"\nPlease find error details below:" +
-		"\n\n"
+	ERROR_DESCRIPTION = "Error generating key pair.\nPlease find error details below:\n\n"
 )
 
 func main() {
@@ -39,9 +37,7 @@ func main() {
 	generate := widget.NewButton("Generate", nil)
 
 	generate.OnTapped = func() {
-		err := generateKeyPair()
-
-		if err == nil {
+		if err := generateKeyPair(); err == nil {
 			description.SetText(POST_DESCRIPTION)
 		} else {
 			description.SetText(ERROR_DESCRIPTION + err.Error())
@@ -83,23 +79,17 @@ func generateKeyPair() error {
 	privateKeyText := encodePrivateKeyToPEM(privateKey)
 	publicKeyText := ssh.MarshalAuthorizedKey(publicKey)
 
-	err = ioutil.WriteFile(PRIVATE_KEY_FILE, privateKeyText, 0600)
-
-	if err != nil {
+	if ioutil.WriteFile(PRIVATE_KEY_FILE, privateKeyText, 0600); err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(PUBLIC_KEY_FILE, publicKeyText, 0600)
-
-	return err
+	return ioutil.WriteFile(PUBLIC_KEY_FILE, publicKeyText, 0600)
 }
 
 func encodePrivateKeyToPEM(privateKey *rsa.PrivateKey) []byte {
-	privateBlock := pem.Block{
+	return pem.EncodeToMemory(&pem.Block{
 		Type:    "RSA PRIVATE KEY",
 		Headers: nil,
 		Bytes:   x509.MarshalPKCS1PrivateKey(privateKey),
-	}
-
-	return pem.EncodeToMemory(&privateBlock)
+	})
 }
