@@ -8,11 +8,14 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 const (
@@ -25,8 +28,8 @@ const (
 		"\nsuch as FileZilla, as well as from the command line."
 	POST_DESCRIPTION = "Key pair has been generated successfully." +
 		"\nPlease find the files below in the same directory as this program:" +
-		"\n\nPrivate key: " + PRIVATE_KEY_FILE +
-		"\nPublic key: " + PUBLIC_KEY_FILE
+		"\n\nPrivate key: %v" +
+		"\nPublic key: %v"
 	ERROR_DESCRIPTION = "Error generating key pair.\nPlease find error details below:\n\n"
 )
 
@@ -37,10 +40,19 @@ func main() {
 	generate := widget.NewButton("Generate", nil)
 
 	generate.OnTapped = func() {
-		if err := generateKeyPair(); err == nil {
-			description.SetText(POST_DESCRIPTION)
-		} else {
+		homeDir, err := os.UserHomeDir()
+
+		if err != nil {
 			description.SetText(ERROR_DESCRIPTION + err.Error())
+		} else {
+			privateKeyPath := filepath.Join(homeDir, PRIVATE_KEY_FILE)
+			publicKeyPath := filepath.Join(homeDir, PUBLIC_KEY_FILE)
+
+			if err := generateKeyPair(privateKeyPath, publicKeyPath); err == nil {
+				description.SetText(fmt.Sprintf(POST_DESCRIPTION, privateKeyPath, publicKeyPath))
+			} else {
+				description.SetText(ERROR_DESCRIPTION + err.Error())
+			}
 		}
 
 		generate.Disable()
@@ -63,7 +75,7 @@ func main() {
 	window.ShowAndRun()
 }
 
-func generateKeyPair() error {
+func generateKeyPair(privateKeyPath, publicKeyPath string) error {
 	privateKey, err := rsa.GenerateKey(rand.Reader, BITS)
 
 	if err != nil {
@@ -79,11 +91,11 @@ func generateKeyPair() error {
 	privateKeyText := encodePrivateKeyToPEM(privateKey)
 	publicKeyText := ssh.MarshalAuthorizedKey(publicKey)
 
-	if ioutil.WriteFile(PRIVATE_KEY_FILE, privateKeyText, 0600); err != nil {
+	if ioutil.WriteFile(privateKeyPath, privateKeyText, 0600); err != nil {
 		return err
 	}
 
-	return ioutil.WriteFile(PUBLIC_KEY_FILE, publicKeyText, 0600)
+	return ioutil.WriteFile(publicKeyPath, publicKeyText, 0600)
 }
 
 func encodePrivateKeyToPEM(privateKey *rsa.PrivateKey) []byte {
