@@ -9,13 +9,14 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 	"golang.org/x/crypto/ssh"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 )
 
 const (
@@ -27,7 +28,7 @@ const (
 		"\n\nThe resulting key pair can be imported for use in programs" +
 		"\nsuch as FileZilla, as well as from the command line."
 	POST_DESCRIPTION = "Key pair has been generated successfully." +
-		"\nPlease find the files below in the same directory as this program:" +
+		"\nPlease find the files below in your home folder:" +
 		"\n\nPrivate key: %v" +
 		"\nPublic key: %v"
 	ERROR_DESCRIPTION = "Error generating key pair.\nPlease find error details below:\n\n"
